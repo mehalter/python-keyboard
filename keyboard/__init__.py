@@ -143,6 +143,11 @@ class Keyboard:
         self.pair_delay = 10
         self.default_color = [0xFF, 0xFF, 0xFF]
         self.light_on_press = False
+        self.RGB_OFF = 0
+        self.RGB_TAP = 1
+        self.RGB_FILL = 2
+        self.RGB_EMPTY = 3
+        self.rgb_mode = self.RGB_OFF
 
         self._current_conn = ""
 
@@ -381,10 +386,16 @@ class Keyboard:
             print(e)
 
     def update_rgb(self, event):
+        if self.rgb_mode == self.RGB_EMPTY and not self.backlight.dev.any():
+            self.backlight.on(*self.default_color)
+            return
         pressed = (event & 0x80) == 0
         key = event if pressed else (event & 0x7F)
-        color = self.default_color if pressed else [0, 0, 0]
-        if self.light_on_press:
+        if self.rgb_mode == self.RGB_EMPTY:
+            color = [0, 0, 0]
+        else:
+            color = self.default_color if pressed else [0, 0, 0]
+        if self.rgb_mode == self.RGB_TAP or ((self.rgb_mode == self.RGB_FILL or self.rgb_mode == self.RGB_EMPTY) and pressed):
             self.backlight.pixel(key, *color)
             if key == 56:
                 self.backlight.pixel(61, *color)
