@@ -141,6 +141,8 @@ class Keyboard:
         self.tap_delay = 500
         self.fast_type_thresh = 200
         self.pair_delay = 10
+        self.default_color = [0xFF, 0xFF, 0xFF]
+        self.light_on_press = False
 
         self._current_conn = ""
 
@@ -163,6 +165,9 @@ class Keyboard:
         self.change_bt(self.ble_id)
         self.ble_hid = HID(ble_hid.devices)
         self.usb_hid = HID(usb_hid.devices)
+
+    def set_default_color(self, r=0xFF, g=0xFF, b=0xFF):
+        self.default_color = [r, g, b]
 
     def update_current_conn(self):
         if usb_is_connected() and self.usb_status == 3:
@@ -379,6 +384,17 @@ class Keyboard:
         key = self.matrix.get()
         if key & 0x80 == 0:
             self.heatmap[key] += 1
+            if self.light_on_press:
+                self.backlight.pixel(key, *self.default_color)
+                if key == 56:
+                    self.backlight.pixel(61, *self.default_color)
+                    self.backlight.pixel(62, *self.default_color)
+        elif self.light_on_press:
+            self.backlight.pixel(key & 0x7F, 0, 0, 0)
+            if (key & 0x7f) == 56:
+                self.backlight.pixel(61, 0, 0, 0)
+                self.backlight.pixel(62, 0, 0, 0)
+        self.backlight.update()
         return key
 
     def run(self):

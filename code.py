@@ -138,4 +138,9 @@ keyboard.pairs_handler = pairs_handler
 # Pairs: J & K, U & I
 keyboard.pairs = [{35, 36}, {20, 19}]
 
+# Set a default light color and enable light on keypress
+keyboard.set_default_color(r=0xFF, g=0, b=0xFF)
+keyboard.light_on_press = True
+
+
 keyboard.run()
