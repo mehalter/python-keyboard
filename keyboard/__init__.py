@@ -385,11 +385,10 @@ class Keyboard:
         except Exception as e:
             print(e)
 
-    def update_rgb(self, event):
+    def update_rgb(self, event, pressed):
         if self.rgb_mode == self.RGB_EMPTY and not self.backlight.dev.any():
             self.backlight.on(*self.default_color)
             return
-        pressed = (event & 0x80) == 0
         key = event if pressed else (event & 0x7F)
         if self.rgb_mode == self.RGB_EMPTY:
             color = [0, 0, 0]
@@ -405,9 +404,10 @@ class Keyboard:
 
     def get(self):
         key = self.matrix.get()
-        if key & 0x80 == 0:
+        pressed = key & 0x80 == 0
+        if pressed:
             self.heatmap[key] += 1
-        self.update_rgb(key)
+        self.update_rgb(key, pressed)
         return key
 
     def run(self):
