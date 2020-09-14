@@ -380,21 +380,23 @@ class Keyboard:
         except Exception as e:
             print(e)
 
+    def update_rgb(self, event):
+        pressed = (event & 0x80) == 0
+        key = event if pressed else (event & 0x7F)
+        color = self.default_color if pressed else [0, 0, 0]
+        if self.light_on_press:
+            self.backlight.pixel(key, *color)
+            if key == 56:
+                self.backlight.pixel(61, *color)
+                self.backlight.pixel(62, *color)
+            self.backlight.update()
+
+
     def get(self):
         key = self.matrix.get()
         if key & 0x80 == 0:
             self.heatmap[key] += 1
-            if self.light_on_press:
-                self.backlight.pixel(key, *self.default_color)
-                if key == 56:
-                    self.backlight.pixel(61, *self.default_color)
-                    self.backlight.pixel(62, *self.default_color)
-        elif self.light_on_press:
-            self.backlight.pixel(key & 0x7F, 0, 0, 0)
-            if (key & 0x7f) == 56:
-                self.backlight.pixel(61, 0, 0, 0)
-                self.backlight.pixel(62, 0, 0, 0)
-        self.backlight.update()
+        self.update_rgb(key)
         return key
 
     def run(self):
